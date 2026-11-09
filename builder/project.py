@@ -55,6 +55,16 @@ class Project:
     def queue(self) -> list[WorkItem]:
         return [WorkItem.from_dict(d) for d in self.state()["queue"]]
 
+    def add_ticket(self, title: str, body: str) -> WorkItem:
+        """Queue a bug/security ticket (from Blue later, or by hand). It runs at the current tick."""
+        st = self.state()
+        if st["features_done"] == 0:
+            raise ValueError("nothing has been built yet, so there's nothing to fix")
+        n = 1 + sum(1 for d in st["queue"] if d["kind"] == "fix") + sum(1 for i in st["done"] if i.startswith("fix-"))
+        item = WorkItem("fix", f"fix-{n}", title.strip(), body.strip(), st["tick"])
+        self.enqueue(item)
+        return item
+
     def enqueue(self, item: WorkItem):
         st = self.state()
         st["queue"].append(item.to_dict())

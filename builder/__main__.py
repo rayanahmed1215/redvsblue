@@ -4,6 +4,8 @@
   python3 -m builder run myblog --ticks 3       # advance the clock 3 ticks, doing whatever arrives
   python3 -m builder run myblog                 # run to the end of the roadmap timeline ("build" works too)
   python3 -m builder run myblog --ollama qwen3.5:9b   # use an Ollama model instead of the MoE
+  python3 -m builder ticket myblog --title "XSS in bios" --body "..."   # queue a fix ticket
+  python3 -m builder run myblog --ticks 0       # process the queue only (e.g. tickets)
   python3 -m builder status myblog              # clock, queue, releases, commits
   python3 -m builder serve myblog               # browse it at http://127.0.0.1:5000
 """
@@ -66,6 +68,16 @@ def cmd_status(args):
               f"  ({r['tries']} {'try' if r['tries'] == 1 else 'tries'}){'  ' + deps if deps else ''}")
 
 
+def cmd_ticket(args):
+    p = load(args.name)
+    body = open(args.body_file).read() if args.body_file else args.body
+    if not body:
+        sys.exit("Give the ticket a description with --body or --body-file.")
+    item = p.add_ticket(args.title, body)
+    print(f"Queued {item.id}: {item.title}\nIt runs on the next `python3 -m builder run {args.name}`"
+          f" (use --ticks 0 to process only the queue without advancing the clock).")
+
+
 def cmd_serve(args):
     p = load(args.name)
     if not p.releases():
@@ -91,6 +103,12 @@ def main():
     s = sub.add_parser("status", help="show the clock, queue and releases")
     s.add_argument("name")
     s.set_defaults(fn=cmd_status)
+    s = sub.add_parser("ticket", help="queue a bug/security fix ticket")
+    s.add_argument("name")
+    s.add_argument("--title", required=True)
+    s.add_argument("--body", help="what's wrong and what to do")
+    s.add_argument("--body-file", help="read the description from a file")
+    s.set_defaults(fn=cmd_ticket)
     s = sub.add_parser("serve", help="run the site on 127.0.0.1")
     s.add_argument("name")
     s.add_argument("--port", type=int, default=5000)

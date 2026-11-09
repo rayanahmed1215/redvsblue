@@ -221,6 +221,21 @@ class RunTest(unittest.TestCase):
         self.assertIn("comments", self.p.attempts()[-2]["failed"])
         self.assertEqual(self.p.releases()[-1]["kind"], "fix")
 
+    def test_ticket_is_queued_and_released(self):
+        with self.assertRaises(ValueError):
+            self.p.add_ticket("Too early", "Nothing is built yet.")
+        self.assertTrue(self.run_ticks(FakeModel(good_script), ticks=2))
+        t1 = self.p.add_ticket("Comments allow HTML", "Escape comment bodies.")
+        t2 = self.p.add_ticket("Second ticket", "Something else.")
+        self.assertEqual((t1.id, t1.tick, t2.id), ("fix-1", 2, "fix-2"))
+        model = FakeModel(good_script)
+        self.assertTrue(self.run_ticks(model, ticks=0))
+        self.assertEqual([k for k, _ in model.calls], ["fix", "fix"])
+        self.assertTrue(model.calls[0][1].startswith("Bug ticket:\n\nComments allow HTML\n\nEscape comment bodies."))
+        self.assertEqual([r["kind"] for r in self.p.releases()][-2:], ["fix", "fix"])
+        self.assertEqual(self.p.state()["tick"], 2, "processing tickets must not advance the clock")
+        self.assertEqual(self.p.add_ticket("Third", "x").id, "fix-3")
+
     def test_regression_is_caught(self):
         self.assertTrue(self.run_ticks(FakeModel(good_script), ticks=3))
         broken = FULL_APP.replace('@app.post("/posts/<int:pid>/comments")', '@app.post("/posts/<int:pid>/comment")')
