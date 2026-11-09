@@ -2,37 +2,87 @@
   {
     "model": "qwen3:8b",
     "seed": 11,
-    "when": "2026-11-08 22:47",
+    "when": "2026-11-09 08:47",
     "stages": [
       {
         "stage": 1,
         "attempts": [
           {
-            "passed": 0,
-            "total": 1,
+            "passed": 1,
+            "total": 4,
             "failed": [
-              "app starts"
+              "create post",
+              "view post",
+              "comments"
             ],
-            "error": "Traceback (most recent call last):\n  File \"/home/rayan/code/projects/rvb/bakeoff/stage_smoke.py\", line 30, in main\n    app = runpy.run_path(os.path.join(app_dir, \"app.py\"), run_name=\"__main__\")[\"app\"]\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen runpy>\", line 285, in run_path\n  File \"<frozen runpy>\", line 259, in _get_code_from_file\n  File \"/home/rayan/code/projects/rvb/bakeoff/out_stages/qwen3-8b/seed11/stage1/try1/app.py\", line 38\n    db = sqlite3.connect(app.config['\n                                    ^\nSyntaxError: unterminated string literal (detected at line 38)\n",
-            "prompt_tokens": 327,
-            "tokens": 290,
-            "ctx_used": 617,
+            "error": "Check 'create post' crashed:\nTraceback (only frames from your app's files):\n  File \"app.py\", line 33, in new_post\n    post_id = db.lastrowid\n              ^^^^^^^^^^^^\nAttributeError: 'sqlite3.Connection' object has no attribute 'lastrowid'\n\n\n(2 later checks were skipped because 'create post' failed.)",
+            "prompt_tokens": 368,
+            "tokens": 1278,
+            "ctx_used": 1646,
             "truncated": false,
-            "seconds": 15.7,
+            "seconds": 55.5,
             "files": [
-              "app.py"
+              "app.py",
+              "schema.sql",
+              "templates/base.html",
+              "templates/index.html",
+              "templates/new_post.html",
+              "templates/post.html"
             ]
           },
           {
-            "passed": 0,
-            "total": 1,
+            "passed": 1,
+            "total": 4,
             "failed": [
-              "app starts"
+              "create post",
+              "view post",
+              "comments"
             ],
-            "error": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 286, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/home/rayan/code/projects/rvb/bakeoff/out_stages/qwen3-8b/seed11/stage1/try2/app.py\", line 14, in <module>\n    @app.before_first_request\n     ^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'Flask' object has no attribute 'before_first_request'. Did you mean: '_got_first_request'?\n",
-            "prompt_tokens": 850,
-            "tokens": 1391,
-            "ctx_used": 2241,
+            "error": "Check 'create post' crashed:\nTraceback (only frames from your app's files):\n  File \"app.py\", line 34, in new_post\n    return redirect(url_for('post', id=post_id))\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nwerkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'post'. Did you forget to specify values ['id']?\n\n\n(2 later checks were skipped because 'create post' failed.)",
+            "prompt_tokens": 1679,
+            "tokens": 1197,
+            "ctx_used": 2876,
+            "truncated": false,
+            "seconds": 48.3,
+            "files": [
+              "app.py",
+              "templates/base.html",
+              "templates/index.html",
+              "templates/new_post.html",
+              "templates/post.html"
+            ]
+          },
+          {
+            "passed": 1,
+            "total": 4,
+            "failed": [
+              "create post",
+              "view post",
+              "comments"
+            ],
+            "error": "Check 'create post' crashed:\nTraceback (only frames from your app's files):\n  File \"app.py\", line 34, in new_post\n    return redirect(url_for('post', id=post_id))\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nwerkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'post'. Did you forget to specify values ['id']?\n\n\n(2 later checks were skipped because 'create post' failed.)",
+            "prompt_tokens": 1706,
+            "tokens": 644,
+            "ctx_used": 2350,
+            "truncated": false,
+            "seconds": 27.2,
+            "files": [
+              "app.py",
+              "templates/post.html"
+            ]
+          },
+          {
+            "passed": 1,
+            "total": 4,
+            "failed": [
+              "create post",
+              "view post",
+              "comments"
+            ],
+            "error": "Check 'create post' crashed:\nTraceback (only frames from your app's files):\n  File \"app.py\", line 34, in new_post\n    return redirect(url_for('post', id=post_id))\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^\nwerkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'post'. Did you forget to specify values ['id']?\n\n\n(2 later checks were skipped because 'create post' failed.)",
+            "prompt_tokens": 1706,
+            "tokens": 1197,
+            "ctx_used": 2903,
             "truncated": false,
             "seconds": 52.7,
             "files": [
@@ -40,41 +90,7 @@
               "templates/base.html",
               "templates/index.html",
               "templates/new_post.html",
-              "templates/post.html",
-              "schema.sql"
-            ]
-          },
-          {
-            "passed": 0,
-            "total": 1,
-            "failed": [
-              "app starts"
-            ],
-            "error": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 286, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/home/rayan/code/projects/rvb/bakeoff/out_stages/qwen3-8b/seed11/stage1/try3/app.py\", line 15, in <module>\n    app.before_first_request(init_db)\n    ^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'Flask' object has no attribute 'before_first_request'. Did you mean: '_got_first_request'?\n",
-            "prompt_tokens": 1820,
-            "tokens": 511,
-            "ctx_used": 2331,
-            "truncated": false,
-            "seconds": 21.0,
-            "files": [
-              "app.py"
-            ]
-          },
-          {
-            "passed": 0,
-            "total": 1,
-            "failed": [
-              "app starts"
-            ],
-            "error": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 286, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/home/rayan/code/projects/rvb/bakeoff/out_stages/qwen3-8b/seed11/stage1/try4/app.py\", line 15, in <module>\n    app.before_first_request(init_db)\n    ^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'Flask' object has no attribute 'before_first_request'. Did you mean: '_got_first_request'?\n",
-            "prompt_tokens": 1829,
-            "tokens": 607,
-            "ctx_used": 2436,
-            "truncated": false,
-            "seconds": 25.7,
-            "files": [
-              "app.py",
-              "templates/schema.sql"
+              "templates/post.html"
             ]
           }
         ],
@@ -82,11 +98,319 @@
       }
     ],
     "num_ctx": 12288,
+    "sampling": "temperature 0.7, top_p 0.8, top_k 20",
     "stages_passed": 0,
     "generations": 4,
-    "tokens": 2799,
-    "tok_s": 26.44528239593389,
-    "seconds": 115.2,
-    "max_ctx_used": 2436
+    "tokens": 4316,
+    "tok_s": 25.165620511142208,
+    "seconds": 183.7,
+    "max_ctx_used": 2903
+  },
+  {
+    "model": "qwen3-coder-30b-a3b (MoE)",
+    "seed": 11,
+    "when": "2026-11-09 08:57",
+    "stages": [
+      {
+        "stage": 1,
+        "attempts": [
+          {
+            "passed": 4,
+            "total": 4,
+            "failed": [],
+            "error": null,
+            "prompt_tokens": 360,
+            "tokens": 1858,
+            "ctx_used": 2218,
+            "truncated": false,
+            "seconds": 132.0,
+            "files": [
+              "app.py",
+              "templates/base.html",
+              "templates/index.html",
+              "templates/new_post.html",
+              "templates/post.html"
+            ]
+          }
+        ],
+        "passed": true
+      },
+      {
+        "stage": 2,
+        "attempts": [
+          {
+            "passed": 7,
+            "total": 8,
+            "failed": [
+              "author shown"
+            ],
+            "error": "Check 'author shown' failed: the home page doesn't show the author's username",
+            "prompt_tokens": 2220,
+            "tokens": 2964,
+            "ctx_used": 5184,
+            "truncated": false,
+            "seconds": 617.0,
+            "files": [
+              "app.py",
+              "templates/base.html",
+              "templates/index.html",
+              "templates/new_post.html",
+              "templates/post.html",
+              "templates/register.html",
+              "templates/login.html"
+            ]
+          },
+          {
+            "passed": 8,
+            "total": 8,
+            "failed": [],
+            "error": null,
+            "prompt_tokens": 3367,
+            "tokens": 1426,
+            "ctx_used": 4793,
+            "truncated": false,
+            "seconds": 104.4,
+            "files": [
+              "app.py",
+              "templates/index.html"
+            ]
+          }
+        ],
+        "passed": true
+      },
+      {
+        "stage": 3,
+        "attempts": [
+          {
+            "passed": 10,
+            "total": 11,
+            "failed": [
+              "author can delete"
+            ],
+            "error": "Check 'author can delete' crashed:\nTraceback (only frames from your app's files):\n  File \"app.py\", line 160, in show_post\n    return render_template('post.html', post=post, comments=comments, post_author=post_author)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"templates/post.html\", line 1, in top-level template code\n    {% extends \"base.html\" %}\n  File \"templates/base.html\", line 116, in top-level template code\n    {% block content %}{% endblock %}\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"templates/post.html\", line 11, in block 'content'\n    <a href=\"{{ url_for('edit_post_form', id=post.id) }}\">Edit</a>\n    ^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<werkzeug routing>\", line 1, in <builder:'/posts/<int:id>/edit'>\njinja2.exceptions.UndefinedError: 'None' has no attribute 'id'\n",
+            "prompt_tokens": 3281,
+            "tokens": 2152,
+            "ctx_used": 5433,
+            "truncated": false,
+            "seconds": 160.1,
+            "files": [
+              "app.py",
+              "templates/post.html",
+              "templates/edit_post.html"
+            ]
+          },
+          {
+            "passed": 11,
+            "total": 11,
+            "failed": [],
+            "error": null,
+            "prompt_tokens": 4225,
+            "tokens": 1795,
+            "ctx_used": 6020,
+            "truncated": false,
+            "seconds": 129.4,
+            "files": [
+              "app.py"
+            ]
+          }
+        ],
+        "passed": true
+      },
+      {
+        "stage": 4,
+        "attempts": [
+          {
+            "passed": 13,
+            "total": 13,
+            "failed": [],
+            "error": null,
+            "prompt_tokens": 3950,
+            "tokens": 4572,
+            "ctx_used": 8522,
+            "truncated": false,
+            "seconds": 253.0,
+            "files": [
+              "app.py",
+              "templates/base.html",
+              "templates/edit_post.html",
+              "templates/index.html",
+              "templates/new_post.html",
+              "templates/post.html",
+              "templates/posts_by_tag.html",
+              "templates/search_results.html"
+            ]
+          }
+        ],
+        "passed": true
+      },
+      {
+        "stage": 5,
+        "attempts": [
+          {
+            "passed": 15,
+            "total": 15,
+            "failed": [],
+            "error": null,
+            "prompt_tokens": 5194,
+            "tokens": 2708,
+            "ctx_used": 7902,
+            "truncated": false,
+            "seconds": 159.2,
+            "files": [
+              "app.py",
+              "templates/post.html",
+              "requirements.txt"
+            ]
+          }
+        ],
+        "passed": true
+      }
+    ],
+    "num_ctx": 12288,
+    "sampling": "temperature 0.7, top_p 0.8, top_k 20",
+    "stages_passed": 5,
+    "generations": 7,
+    "tokens": 17475,
+    "tok_s": 16.395361244572715,
+    "seconds": 1555.0,
+    "max_ctx_used": 8522,
+    "note": "llama.cpp n-cpu-moe=36"
+  },
+  {
+    "model": "qwen3-coder-30b-a3b (MoE)",
+    "seed": 22,
+    "when": "2026-11-09 09:23",
+    "stages": [
+      {
+        "stage": 1,
+        "attempts": [
+          {
+            "passed": 4,
+            "total": 4,
+            "failed": [],
+            "error": null,
+            "prompt_tokens": 360,
+            "tokens": 2050,
+            "ctx_used": 2410,
+            "truncated": false,
+            "seconds": 110.5,
+            "files": [
+              "app.py",
+              "templates/base.html",
+              "templates/index.html",
+              "templates/new_post.html",
+              "templates/post.html"
+            ]
+          }
+        ],
+        "passed": true
+      },
+      {
+        "stage": 2,
+        "attempts": [
+          {
+            "passed": 8,
+            "total": 8,
+            "failed": [],
+            "error": null,
+            "prompt_tokens": 2412,
+            "tokens": 3211,
+            "ctx_used": 5623,
+            "truncated": false,
+            "seconds": 179.8,
+            "files": [
+              "app.py",
+              "templates/base.html",
+              "templates/register.html",
+              "templates/login.html",
+              "templates/index.html",
+              "templates/post.html",
+              "templates/new_post.html"
+            ]
+          }
+        ],
+        "passed": true
+      },
+      {
+        "stage": 3,
+        "attempts": [
+          {
+            "passed": 11,
+            "total": 11,
+            "failed": [],
+            "error": null,
+            "prompt_tokens": 3507,
+            "tokens": 2290,
+            "ctx_used": 5797,
+            "truncated": false,
+            "seconds": 137.1,
+            "files": [
+              "app.py",
+              "templates/edit_post.html",
+              "templates/post.html"
+            ]
+          }
+        ],
+        "passed": true
+      },
+      {
+        "stage": 4,
+        "attempts": [
+          {
+            "passed": 13,
+            "total": 13,
+            "failed": [],
+            "error": null,
+            "prompt_tokens": 4166,
+            "tokens": 5229,
+            "ctx_used": 9395,
+            "truncated": false,
+            "seconds": 295.9,
+            "files": [
+              "app.py",
+              "templates/base.html",
+              "templates/edit_post.html",
+              "templates/index.html",
+              "templates/post.html",
+              "templates/new_post.html",
+              "templates/posts_by_tag.html",
+              "templates/search_results.html"
+            ]
+          }
+        ],
+        "passed": true
+      },
+      {
+        "stage": 5,
+        "attempts": [
+          {
+            "passed": 15,
+            "total": 15,
+            "failed": [],
+            "error": null,
+            "prompt_tokens": 5818,
+            "tokens": 3106,
+            "ctx_used": 8924,
+            "truncated": false,
+            "seconds": 187.6,
+            "files": [
+              "requirements.txt",
+              "app.py",
+              "templates/post.html"
+            ]
+          }
+        ],
+        "passed": true
+      }
+    ],
+    "num_ctx": 12288,
+    "sampling": "temperature 0.7, top_p 0.8, top_k 20",
+    "stages_passed": 5,
+    "generations": 5,
+    "tokens": 15886,
+    "tok_s": 18.83771179259989,
+    "seconds": 910.9,
+    "max_ctx_used": 9395,
+    "note": "llama.cpp n-cpu-moe=36"
   }
 ]

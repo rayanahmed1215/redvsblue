@@ -104,6 +104,7 @@ def render(rows):
     avg = lambda xs: sum(xs) / len(xs) if xs else 0  # noqa: E731
     lines = [
         "# Builder bake-off results", "",
+        "Note: these runs used temperature 0.2, so outputs from different seeds were often near-identical (up to 97% similar).",
         "Task: `bakeoff/task.md` (Flask + SQLite blog). Score = smoke-test steps passed out of 5.",
         "Each run gets one first attempt and, if it fails, one repair attempt with the error message.", "",
         "| Model | Runs | 1st try avg (/5) | 1st try working | After repair avg (/5) | After repair working | Avg tok/s | Avg sec/run | Avg LOC | Notes |",

@@ -6,7 +6,9 @@ import json
 import time
 import urllib.request
 
-TEMPERATURE = 0.2
+TEMPERATURE = 0.7  # Qwen's recommended non-thinking sampling; 0.2 made runs near-identical
+TOP_P = 0.8
+TOP_K = 20
 NUM_CTX = 8192  # 16k spilled 7% of a 7B model to CPU on 8 GB VRAM
 MAX_OUTPUT = 6144
 
@@ -24,7 +26,8 @@ def ollama_chat(model, messages, seed, think=None, num_ctx=NUM_CTX, host="http:/
         "model": model,
         "messages": messages,
         "stream": False,
-        "options": {"temperature": TEMPERATURE, "seed": seed, "num_ctx": num_ctx, "num_predict": MAX_OUTPUT},
+        "options": {"temperature": TEMPERATURE, "top_p": TOP_P, "top_k": TOP_K, "seed": seed,
+                    "num_ctx": num_ctx, "num_predict": MAX_OUTPUT},
     }
     if think is not None:  # only send for models that support thinking, or Ollama errors
         body["think"] = think
@@ -44,7 +47,8 @@ def ollama_chat(model, messages, seed, think=None, num_ctx=NUM_CTX, host="http:/
 
 
 def llamacpp_chat(messages, seed, url="http://127.0.0.1:8081"):
-    body = {"messages": messages, "temperature": TEMPERATURE, "seed": seed, "max_tokens": MAX_OUTPUT}
+    body = {"messages": messages, "temperature": TEMPERATURE, "top_p": TOP_P, "top_k": TOP_K,
+            "seed": seed, "max_tokens": MAX_OUTPUT}
     start = time.time()
     data = _post(f"{url}/v1/chat/completions", body)
     seconds = time.time() - start

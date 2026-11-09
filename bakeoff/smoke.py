@@ -11,6 +11,19 @@ import traceback
 STEPS = ["home page loads", "create post", "view post", "add comment", "comment shows"]
 
 
+def app_traceback(app_dir):
+    """The current exception, showing only stack frames from the app's own files (app.py and templates).
+
+    "Last N frames" can hide the app entirely when the error is raised deep inside Flask or Jinja.
+    """
+    etype, evalue, tb = sys.exc_info()
+    frames = [f for f in traceback.extract_tb(tb) if os.path.abspath(f.filename).startswith(app_dir)]
+    lines = ["Traceback (only frames from your app's files):\n"]
+    lines += traceback.format_list(frames) or ["  (no frames in your files; error raised inside a library)\n"]
+    lines += traceback.format_exception_only(etype, evalue)
+    return "".join(lines).replace(app_dir + os.sep, "")[-1500:]  # show paths as app.py, templates/x.html
+
+
 def main(app_dir):
     os.chdir(app_dir)
     sys.path.insert(0, app_dir)
@@ -56,7 +69,7 @@ def main(app_dir):
         assert comment in page, "comment not shown on post page"
         passed = 5
     except BaseException:  # noqa: BLE001 - we want any failure, including SystemExit
-        error = traceback.format_exc(limit=-4)[-1500:]  # last frames = the app's own code
+        error = app_traceback(app_dir)  # last frames = the app's own code
     print(json.dumps({"passed": passed, "failed_step": None if passed == 5 else STEPS[passed], "error": error}))
 
 

@@ -1,5 +1,6 @@
 # Builder bake-off results
 
+Note: these runs used temperature 0.2, so outputs from different seeds were often near-identical (up to 97% similar).
 Task: `bakeoff/task.md` (Flask + SQLite blog). Score = smoke-test steps passed out of 5.
 Each run gets one first attempt and, if it fails, one repair attempt with the error message.
 

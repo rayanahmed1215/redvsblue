@@ -16,7 +16,7 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from backends import llamacpp_chat, ollama_chat  # noqa: E402
+from backends import TEMPERATURE, TOP_K, TOP_P, llamacpp_chat, ollama_chat  # noqa: E402
 from check import VENV_PY, write_files  # noqa: E402
 from run import MODELS, SEEDS, SYSTEM, slug  # noqa: E402
 
@@ -25,6 +25,11 @@ STAGES = sorted((HERE / "stages").glob("stage*.md"))
 RESULTS_JSON = HERE / "results_stages.json"
 RESULTS_MD = HERE / "results_stages.md"
 MAX_REPAIRS = 3
+# Don't mention app.app_context() here: it's the Flask-SQLAlchemy idiom and pulled qwen3 toward that library.
+STAGE_SYSTEM = SYSTEM + (" This is Flask 3.x, where before_first_request no longer exists: create the database "
+                         "tables with a plain function that app.py calls once at import time, using Python's "
+                         "built-in sqlite3 module.")
+SAMPLING = f"temperature {TEMPERATURE}, top_p {TOP_P}, top_k {TOP_K}"
 CODE_SUFFIXES = {".py", ".html", ".css", ".js", ".txt"}
 
 FORMAT_FIRST = """Reply with every file needed to run the app. Write each file as a heading line with its path, followed by a code block with the complete file contents, like this:
@@ -82,7 +87,7 @@ def grade_stage(app_dir: Path, stage: int, timeout=60) -> dict:
 def run_one(name, cfg, seed, num_ctx):
     label = cfg.get("label", name)
     base = HERE / "out_stages" / slug(label) / f"seed{seed}"
-    row = {"model": label, "seed": seed, "when": time.strftime("%Y-%m-%d %H:%M"), "stages": [], "num_ctx": num_ctx}
+    row = {"model": label, "seed": seed, "when": time.strftime("%Y-%m-%d %H:%M"), "stages": [], "num_ctx": num_ctx, "sampling": SAMPLING}
     code_dir = None  # last passing version
     tokens = gen_s = seconds = 0.0
     print(f"  {label} seed={seed}")
@@ -91,13 +96,15 @@ def run_one(name, cfg, seed, num_ctx):
         st = {"stage": i, "attempts": [], "passed": False}
         latest_dir, error = code_dir, None
         for attempt in range(1, MAX_REPAIRS + 2):
-            messages = [{"role": "system", "content": SYSTEM},
+            messages = [{"role": "system", "content": STAGE_SYSTEM},
                         {"role": "user", "content": build_prompt(stage_text, latest_dir, error)}]
+            # A distinct seed per attempt: with a fixed seed, an identical retry prompt gives an identical reply.
+            gen_seed = seed * 100 + i * 10 + attempt
             try:
                 if cfg["backend"] == "ollama":
-                    gen = ollama_chat(name, messages, seed, think=cfg.get("think"), num_ctx=num_ctx)
+                    gen = ollama_chat(name, messages, gen_seed, think=cfg.get("think"), num_ctx=num_ctx)
                 else:
-                    gen = llamacpp_chat(messages, seed)
+                    gen = llamacpp_chat(messages, gen_seed)
             except Exception as e:  # noqa: BLE001
                 st["attempts"].append({"backend_error": str(e)})
                 print(f"    stage {i} try {attempt}: backend error {e}")
@@ -149,14 +156,15 @@ def render(rows):
     lines = [
         "# Multi-stage Builder bake-off", "",
         f"{n} stages (`bakeoff/stages/`), each graded on every feature so far. Up to {MAX_REPAIRS} repairs per stage;",
-        "a run stops at the first stage it can't pass.", "",
-        "| Model | Runs | Avg stages passed | Finished all | Tries per stage (avg) | Avg minutes/run | Stages per hour | Avg tok/s | Max context used | Notes |",
+        "a run stops at the first stage it can't pass.",
+        f"Sampling: {SAMPLING}. The system prompt includes a Flask 3 hint (no before_first_request; create tables with sqlite3 at import).", "",
+        "| Model | Runs | Avg stages passed | Finished all | Tries per attempted stage (avg) | Avg minutes/run | Stages per hour | Avg tok/s | Max context used | Notes |",
         "|---|---|---|---|---|---|---|---|---|---|",
     ]
     for model, rs in by_model.items():
         passed = [r["stages_passed"] for r in rs]
         total_min = sum(r["seconds"] for r in rs) / 60
-        tries = [len(s["attempts"]) for r in rs for s in r["stages"] if s["passed"]]
+        tries = [len(s["attempts"]) for r in rs for s in r["stages"]]  # includes the stage it got stuck on
         notes = sorted({r.get("note") for r in rs if r.get("note")})
         lines.append(
             f"| {model} | {len(rs)} | {avg(passed):.1f}/{n} | {passed.count(n)}/{len(rs)} | {avg(tries):.1f} | "

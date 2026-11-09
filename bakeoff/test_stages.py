@@ -167,6 +167,20 @@ class StageGraderTest(unittest.TestCase):
         res = grade(REFERENCE.replace("@app.post(\"/posts/<int:pid>/comments\")", "@app.post(\"/posts/<int:pid>/comment\")"), 5)
         self.assertIn("comments", res["failed"])
 
+    def test_failed_create_post_skips_dependent_checks(self):
+        res = grade(REFERENCE.replace('"insert into posts(title', '"insert into no_such_table(title'), 5)
+        self.assertIn("create post", res["failed"])
+        self.assertTrue(res["skipped"], "checks that need the post should be skipped")
+        self.assertNotIn("create post", res["skipped"])
+        self.assertNotIn("KeyError: 'id'", res["error"])
+        self.assertIn("later checks were skipped", res["error"])
+
+    def test_error_shows_app_line_not_library_internals(self):
+        res = grade(REFERENCE.replace('return redirect(f"/posts/{cur.lastrowid}")', 'return redirect(url_for_missing_id())'), 5)
+        self.assertIn('File "app.py"', res["error"])
+        self.assertIn("url_for_missing_id", res["error"])
+        self.assertNotIn("site-packages", res["error"])
+
     def test_crash_on_startup(self):
         res = grade("import nope_not_a_module\n", 3)
         self.assertEqual(res["failed"], ["app starts"])
