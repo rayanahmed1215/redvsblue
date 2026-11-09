@@ -8,6 +8,7 @@
   python3 -m builder serve myblog               # browse it at http://127.0.0.1:5000
 """
 import argparse
+import os
 import subprocess
 import sys
 
@@ -49,8 +50,9 @@ def cmd_status(args):
     rm, st = p.roadmap(), p.state()
     print(f"\n{p.name}: tick {st['tick']}/{rm.last_tick}, features {st['features_done']}/{len(rm.stages)}"
           f" (roadmap '{rm.name}')")
-    if st["deps"]:
-        print("Dependencies: " + ", ".join(f"{k}=={v}" for k, v in st["deps"].items()))
+    print("Dependencies: " + (", ".join(f"{k}=={v}" for k, v in st["deps"].items()) or "none"))
+    if st["published"]:
+        print("Published:    " + ", ".join(f"{k} {'/'.join(v)}" for k, v in sorted(st["published"].items())))
     queue = p.queue()
     print(f"\nQueue ({len(queue)}):" + ("" if queue else " empty"))
     for item in queue:
@@ -68,7 +70,8 @@ def cmd_serve(args):
     p = load(args.name)
     if not p.releases():
         sys.exit("Nothing released yet.")
-    subprocess.run([str(VENV_PY), str(PKG / "serve_app.py"), str(p.dir), str(args.port)])
+    env = {**os.environ, "PYTHONPATH": str(p.meta / "libs")}  # the site's homemade library versions
+    subprocess.run([str(VENV_PY), str(PKG / "serve_app.py"), str(p.dir), str(args.port)], env=env)
 
 
 def main():

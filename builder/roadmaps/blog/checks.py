@@ -102,7 +102,7 @@ def define(c, app):
     @c.check("requirements.txt", 5)
     def _():
         assert os.path.exists("requirements.txt"), "requirements.txt is missing"
-        assert re.search(r"(?im)^\s*markdown\b", open("requirements.txt").read()), "requirements.txt doesn't list markdown"
+        assert re.search(r"(?im)^\s*mdlite\b", open("requirements.txt").read()), "requirements.txt doesn't list mdlite"
 
     @c.check("others can't edit or delete", 3, needs=("post_id",))
     def _():

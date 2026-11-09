@@ -1,0 +1,35 @@
+[
+  {
+    "id": "MDLITE-1",
+    "lib": "mdlite",
+    "kind": "security",
+    "class": "xss",
+    "introduced": "1.1.0",
+    "fixed": "1.2.0",
+    "disclosed_in": "1.2.0",
+    "summary": "Raw HTML is passed through by default (allow_html=True), so any Markdown from users can inject <script> tags.",
+    "exploit_hint": "A post body or bio containing <script>...</script> is rendered as-is."
+  },
+  {
+    "id": "UPLOADKIT-1",
+    "lib": "uploadkit",
+    "kind": "security",
+    "class": "path-traversal",
+    "introduced": "1.0.0",
+    "fixed": "1.0.1",
+    "disclosed_in": null,
+    "summary": "save_upload() joins the client-supplied filename onto upload_dir, so '../' in the filename writes outside the upload folder. Fixed silently ('Improved filename handling').",
+    "exploit_hint": "Upload with filename '../../x.png' and it lands two folders above the upload directory."
+  },
+  {
+    "id": "PAGER-1",
+    "lib": "pager",
+    "kind": "bug",
+    "class": "functional",
+    "introduced": "1.0.0",
+    "fixed": "1.0.1",
+    "disclosed_in": "1.0.1",
+    "summary": "pages is computed with floor division, so the last partial page is dropped (7 items at 5 per page gives 1 page).",
+    "exploit_hint": null
+  }
+]

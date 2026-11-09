@@ -6,11 +6,12 @@ run():     advance the clock tick by tick, queueing each tick's features and lib
            process the queue in order. Stops at the first item that can't be completed.
 """
 import json
+import os
 import random
 import subprocess
 import time
 
-from . import llm
+from . import deps, llm
 from .config import MAX_REPAIRS, PKG, SYSTEM_PROMPT, VENV_PY, ModelConfig
 from .files import apply_files, current_code, lines_of_code
 from .items import WorkItem, feature_item
@@ -33,10 +34,11 @@ FORMAT_CHANGES = """Reply with the complete contents of every file you add or ch
 Files you don't include stay exactly as they are."""
 
 
-def build_prompt(request: str, code: str | None, error: str | None) -> str:
+def build_prompt(request: str, code: str | None, error: str | None, libraries: str = "") -> str:
+    libs = f"\n{libraries}\n" if libraries else ""
     if code is None and error is None:
-        return f"{request}\n{FORMAT_FIRST}"
-    msg = f"{request}\n"
+        return f"{request}{libs}\n{FORMAT_FIRST}"
+    msg = f"{request}{libs}\n"
     if code:
         msg += f"\nHere is the app's current code:\n\n{code}\n"
     if error:
@@ -57,8 +59,9 @@ def run_checks(project: Project, level: int, timeout=90) -> dict:
         return {"passed": 0, "total": 0, "failed": [], "skipped": [], "failed_step": None, "error": None}
     clear_dbs(project)  # every check run starts from an empty database
     cmd = [str(VENV_PY), str(PKG / "checker.py"), str(project.dir), str(project.roadmap().checks), str(level)]
+    env = {**os.environ, "PYTHONPATH": str(project.meta / "libs")}  # the site's homemade library versions
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout, env=env)
     except subprocess.TimeoutExpired:
         return fail("timeout", f"The checks took longer than {timeout}s (the app may hang).")
     finally:
@@ -83,13 +86,22 @@ def process(project: Project, item: WorkItem, cfg: ModelConfig, max_repairs: int
     error = None
     for attempt in range(1, max_repairs + 2):
         has_code = st["features_done"] > 0 or attempt > 1
-        prompt = build_prompt(item.request(), current_code(project.dir) if has_code else None, error)
+        prompt = build_prompt(item.request(), current_code(project.dir) if has_code else None, error,
+                              deps.docs_for_prompt(st["published"], st["deps"]))
         seed = random.randrange(1, 2**31)
         gen = chat(cfg, [{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": prompt}], seed)
         applied = apply_files(gen["text"], project.dir)
+        req = project.dir / "requirements.txt"
+        new_deps, dep_errors = deps.resolve(req.read_text() if req.exists() else None, st["published"])
         if not applied["written"]:
             res = fail("no files found", "Your reply didn't contain any files in the `### File: <path>` format.")
+        elif dep_errors:
+            res = fail("requirements", "\n".join(dep_errors))
+        elif item.kind == "dep_update" and new_deps.get(item.extra["lib"]) != item.extra["version"]:
+            res = fail("upgrade", f"requirements.txt must pin {item.extra['lib']}=={item.extra['version']}"
+                                  f" (it currently resolves to {new_deps.get(item.extra['lib'], 'nothing')}).")
         else:
+            deps.install(project.meta / "libs", new_deps)
             res = run_checks(project, level)
         ctx_used = gen["prompt_tokens"] + gen["tokens"]
         entry = {"item": item.id, "kind": item.kind, "attempt": attempt, "tick": item.tick,
@@ -106,8 +118,9 @@ def process(project: Project, item: WorkItem, cfg: ModelConfig, max_repairs: int
             + (f" (failed: {', '.join(res['failed'])})" if res["failed"] else "")
             + f"  {gen['seconds']:.0f}s, ctx {ctx_used}/{cfg.num_ctx}{warn}")
         if not res["failed"]:
-            rel = project.release(item, cfg.model, attempt, st["deps"])
+            rel = project.release(item, cfg.model, attempt, new_deps)
             st = project.state()
+            st["deps"] = new_deps
             st["queue"] = [d for d in st["queue"] if d["id"] != item.id]
             st["done"].append(item.id)
             if item.kind == "feature":
@@ -118,6 +131,7 @@ def process(project: Project, item: WorkItem, cfg: ModelConfig, max_repairs: int
             return True
         error = res.get("error") or ", ".join(res["failed"])
     project.discard_changes()
+    deps.install(project.meta / "libs", st["deps"])  # back to the last release's library versions
     log(f"  Failed after {max_repairs + 1} tries; rolled back to the last release. It stays at the front of the"
         f" queue. Every attempt is saved in {project.meta / 'attempts' / item.id}")
     return False
@@ -132,8 +146,16 @@ def advance_tick(project: Project, log=print) -> int:
     t = rm.tick(st["tick"])
     events = []
     if t:
-        if t.releases:
-            raise NotImplementedError("library releases arrive in phase 2 (ecosystem)")
+        for r in t.releases:  # libraries ship on their own schedule
+            lib, version = r["lib"], r["version"]
+            if version not in deps.all_versions(lib):
+                raise ValueError(f"timeline publishes {lib} {version}, which isn't in ecosystem/{lib}/")
+            st["published"].setdefault(lib, []).append(version)
+            events.append(f"{lib} {version} released")
+            current = st["deps"].get(lib)
+            if current and deps.vkey(version) > deps.vkey(current):
+                st["queue"].append(deps.dep_update_item(lib, version, current, st["tick"]).to_dict())
+                events[-1] += " (upgrade queued)"
         for n in t.features:
             st["queue"].append(feature_item(rm.stage(n), st["tick"]).to_dict())
             events.append(f"feature {n} requested")

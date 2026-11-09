@@ -1,7 +1,8 @@
 [
-  {"tick": 1, "features": [1]},
+  {"tick": 1, "features": [1], "releases": [{"lib": "mdlite", "version": "1.0.0"}, {"lib": "uploadkit", "version": "1.0.0"}, {"lib": "pager", "version": "1.0.0"}]},
   {"tick": 2, "features": [2]},
   {"tick": 3, "features": [3]},
   {"tick": 4, "features": [4]},
-  {"tick": 5, "features": [5]}
+  {"tick": 5, "features": [5]},
+  {"tick": 6, "releases": [{"lib": "mdlite", "version": "1.1.0"}]}
 ]

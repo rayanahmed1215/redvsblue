@@ -2,11 +2,13 @@
 
 Run: python3 -m unittest discover -s builder/tests -t .
 """
+import re
 import tempfile
 import unittest
 from pathlib import Path
 
 from builder.build import build_prompt, run, run_checks
+from builder import deps
 from builder.config import ModelConfig
 from builder.files import apply_files, parse_files
 from builder.items import WorkItem
@@ -17,10 +19,12 @@ BROKEN_APP = "from flask import Flask\napp = Flask(__name__)\n"  # home page 404
 FEATURE_STARTS = ["Build a small blog", "Add user accounts", "Let authors edit", "Add tags and search", "Let authors format"]
 
 
-def reply(app_src, requirements=True):
+def reply(app_src, requirements=True, mdlite="1.0.0"):
     text = f"### File: app.py\n```python\n{app_src}\n```\n"
+    if requirements is True:
+        requirements = f"flask\nmdlite=={mdlite}\n"
     if requirements:
-        text += "\n### File: requirements.txt\n```\nflask\nmarkdown\n```\n"
+        text += f"\n### File: requirements.txt\n```\n{requirements}```\n"
     return text
 
 
@@ -49,7 +53,12 @@ class FakeModel:
 
 
 def good_script(key, attempt, prompt):
-    return reply(STAGE1_APP, requirements=False) if key == 1 else reply(FULL_APP)
+    """Correct replies: the stage-1 app, then the full app; upgrades pin whatever version was requested."""
+    if key == 1:
+        return reply(STAGE1_APP, requirements=False)
+    if key == "dep":
+        return reply(FULL_APP, mdlite=re.search(r"Upgrade the app to mdlite==([0-9.]+)", prompt).group(1))
+    return reply(FULL_APP)
 
 
 class RunTest(unittest.TestCase):
@@ -65,22 +74,75 @@ class RunTest(unittest.TestCase):
     def commits(self):
         return self.p.git("log", "--format=%s").strip().splitlines()
 
-    def test_full_timeline_releases_every_feature(self):
-        self.assertTrue(self.run_ticks(FakeModel(good_script)))
+    def test_full_timeline_with_library_upgrade(self):
+        def script(key, attempt, prompt):
+            return reply(FULL_APP, mdlite="1.1.0") if key == "dep" else good_script(key, attempt, prompt)
+        self.assertTrue(self.run_ticks(FakeModel(script), ticks=6))
         st = self.p.state()
-        self.assertEqual((st["tick"], st["features_done"], st["queue"]), (5, 5, []))
-        self.assertEqual(len(self.commits()), 6)  # start + 5 releases
-        self.assertEqual(self.commits()[0], "feature: Let authors format posts with Markdown")
-        self.assertEqual([r["version"] for r in self.p.releases()], ["v1", "v2", "v3", "v4", "v5"])
-        self.assertEqual(self.p.git("tag").split(), ["v1", "v2", "v3", "v4", "v5"])
-        self.assertIn("\nEnd of the roadmap timeline.", self.out)
+        self.assertEqual((st["tick"], st["features_done"], st["queue"]), (6, 5, []))
+        self.assertEqual(st["deps"], {"mdlite": "1.1.0"})
+        self.assertEqual(st["published"]["mdlite"], ["1.0.0", "1.1.0"])
+        rels = self.p.releases()
+        self.assertEqual([r["version"] for r in rels], ["v1", "v2", "v3", "v4", "v5", "v6"])
+        self.assertEqual((rels[4]["deps"], rels[5]["kind"], rels[5]["deps"]),
+                         ({"mdlite": "1.0.0"}, "dep_update", {"mdlite": "1.1.0"}))
+        self.assertEqual(self.commits()[0], "dep_update: Upgrade mdlite to 1.1.0")
+        self.assertIn('__version__ = "1.1.0"', (self.p.meta / "libs" / "mdlite.py").read_text())
+
+    def test_unpublished_or_unknown_packages_are_rejected(self):
+        def script(key, attempt, prompt):
+            if attempt == 1:
+                return reply(STAGE1_APP, requirements="flask\nrequests\nmdlite==9.9.9\n")
+            return reply(STAGE1_APP, requirements="flask\n")  # the repair fixes requirements.txt
+        model = FakeModel(script)
+        self.assertTrue(self.run_ticks(model, ticks=1))
+        err = self.p.attempts()[0]["error"]
+        self.assertIn("'requests' isn't available", err)
+        self.assertIn("mdlite==9.9.9 doesn't exist", err)
+        self.assertIn("some checks failed", model.calls[1][1])
+
+    def test_breaking_upgrade_needs_a_repair(self):
+        self.assertTrue(self.run_ticks(FakeModel(good_script), ticks=5))
+        st = self.p.state()
+        st["published"]["mdlite"] += ["1.1.0", "1.2.0", "2.0.0"]
+        self.p.save_state(st)
+        self.p.enqueue(deps.dep_update_item("mdlite", "2.0.0", "1.0.0", tick=5))
+
+        def script(key, attempt, prompt):
+            if attempt == 1:  # pins 2.0.0 but still calls render()
+                return reply(FULL_APP, mdlite="2.0.0")
+            return reply(FULL_APP.replace("mdlite.render(", "mdlite.to_html("), mdlite="2.0.0")
+        model = FakeModel(script)
+        self.assertTrue(self.run_ticks(model, ticks=0))
+        self.assertIn("`render()` has been renamed to `to_html()`", model.calls[0][1])
+        self.assertIn("has no attribute 'render'", self.p.attempts()[-2]["error"])
+        self.assertEqual(self.p.state()["deps"], {"mdlite": "2.0.0"})
+
+    def test_upgrade_must_actually_change_the_pin(self):
+        self.assertTrue(self.run_ticks(FakeModel(good_script), ticks=5))
+        st = self.p.state()
+        st["published"]["mdlite"].append("1.1.0")
+        self.p.save_state(st)
+        self.p.enqueue(deps.dep_update_item("mdlite", "1.1.0", "1.0.0", tick=5))
+        stays_on_old = FakeModel(lambda key, attempt, prompt: reply(FULL_APP, mdlite="1.0.0"))
+        self.assertFalse(self.run_ticks(stays_on_old, ticks=0, max_repairs=0))
+        self.assertIn("must pin mdlite==1.1.0", self.p.attempts()[-1]["error"])
+        self.assertIn('__version__ = "1.0.0"', (self.p.meta / "libs" / "mdlite.py").read_text(),
+                      "libraries weren't restored after the failed upgrade")
+
+    def test_prompt_includes_library_docs(self):
+        model = FakeModel(good_script)
+        self.assertTrue(self.run_ticks(model, ticks=1))
+        self.assertIn("Available libraries", model.calls[0][1])
+        for lib in ("# mdlite 1.0.0", "# uploadkit 1.0.0", "# pager 1.0.0"):
+            self.assertIn(lib, model.calls[0][1])
 
     def test_ticks_limit_and_resume(self):
         self.assertTrue(self.run_ticks(FakeModel(good_script), ticks=2))
         self.assertEqual(self.p.state()["tick"], 2)
         model = FakeModel(good_script)
         self.assertTrue(self.run_ticks(model))
-        self.assertEqual([k for k, _ in model.calls], [3, 4, 5])
+        self.assertEqual([k for k, _ in model.calls], [3, 4, 5, "dep"])  # tick 6 ships mdlite 1.1.0
 
     def test_repair_after_failure(self):
         def script(key, attempt, prompt):
