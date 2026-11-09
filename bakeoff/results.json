@@ -1,0 +1,398 @@
+[
+  {
+    "model": "qwen2.5-coder:7b",
+    "seed": 11,
+    "when": "2026-11-08 20:08",
+    "out_dir": "out/qwen2.5-coder-7b/seed11",
+    "try1": {
+      "passed": 5,
+      "failed_step": null,
+      "error": null,
+      "files": [
+        "app.py",
+        "templates/base.html",
+        "templates/index.html",
+        "templates/post.html",
+        "templates/new_post.html",
+        "templates/new_comment.html"
+      ],
+      "loc": 149,
+      "truncated": false
+    },
+    "final": 5,
+    "tokens": 1329,
+    "tok_s": 45.46650215871257,
+    "seconds": 38.1
+  },
+  {
+    "model": "qwen2.5-coder:7b",
+    "seed": 22,
+    "when": "2026-11-08 20:08",
+    "out_dir": "out/qwen2.5-coder-7b/seed22",
+    "try1": {
+      "passed": 0,
+      "failed_step": "home page loads",
+      "error": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 286, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/home/rayan/code/projects/rvb/bakeoff/out/qwen2.5-coder-7b/seed22/try1/app.py\", line 23, in <module>\n    @app.before_first_request\n     ^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'Flask' object has no attribute 'before_first_request'. Did you mean: '_got_first_request'?\n",
+      "files": [
+        "app.py",
+        "templates/base.html",
+        "templates/index.html",
+        "templates/new_post.html",
+        "templates/post.html",
+        "templates/new_comment.html"
+      ],
+      "loc": 154,
+      "truncated": false
+    },
+    "try2": {
+      "passed": 0,
+      "failed_step": "home page loads",
+      "error": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 286, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/home/rayan/code/projects/rvb/bakeoff/out/qwen2.5-coder-7b/seed22/try2/app.py\", line 23, in <module>\n    @app.before_first_request\n     ^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'Flask' object has no attribute 'before_first_request'. Did you mean: '_got_first_request'?\n",
+      "files": [
+        "app.py"
+      ],
+      "loc": 154,
+      "truncated": false
+    },
+    "final": 0,
+    "tokens": 1952,
+    "tok_s": 45.1896944294293,
+    "seconds": 47.0
+  },
+  {
+    "model": "qwen2.5-coder:7b",
+    "seed": 33,
+    "when": "2026-11-08 20:09",
+    "out_dir": "out/qwen2.5-coder-7b/seed33",
+    "try1": {
+      "passed": 0,
+      "failed_step": "home page loads",
+      "error": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 286, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/home/rayan/code/projects/rvb/bakeoff/out/qwen2.5-coder-7b/seed33/try1/app.py\", line 11, in <module>\n    @app.before_first_request\n     ^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'Flask' object has no attribute 'before_first_request'. Did you mean: '_got_first_request'?\n",
+      "files": [
+        "app.py",
+        "templates/base.html",
+        "templates/index.html",
+        "templates/new_post.html",
+        "templates/post.html"
+      ],
+      "loc": 120,
+      "truncated": false
+    },
+    "try2": {
+      "passed": 0,
+      "failed_step": "home page loads",
+      "error": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 286, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/home/rayan/code/projects/rvb/bakeoff/out/qwen2.5-coder-7b/seed33/try2/app.py\", line 11, in <module>\n    @app.before_first_request\n     ^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'Flask' object has no attribute 'before_first_request'. Did you mean: '_got_first_request'?\n",
+      "files": [
+        "app.py"
+      ],
+      "loc": 120,
+      "truncated": false
+    },
+    "final": 0,
+    "tokens": 1732,
+    "tok_s": 45.21740200296947,
+    "seconds": 41.4
+  },
+  {
+    "model": "qwen3:8b",
+    "seed": 11,
+    "when": "2026-11-08 20:10",
+    "out_dir": "out/qwen3-8b/seed11",
+    "try1": {
+      "passed": 1,
+      "failed_step": "create post",
+      "error": "Traceback (most recent call last):\n  File \"/home/rayan/code/projects/rvb/bakeoff/.venv/lib/python3.12/site-packages/flask/app.py\", line 919, in full_dispatch_request\n    rv = self.handle_user_exception(e)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rayan/code/projects/rvb/bakeoff/.venv/lib/python3.12/site-packages/flask/app.py\", line 917, in full_dispatch_request\n    rv = self.dispatch_request()\n         ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rayan/code/projects/rvb/bakeoff/.venv/lib/python3.12/site-packages/flask/app.py\", line 902, in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rayan/code/projects/rvb/bakeoff/out/qwen3-8b/seed11/try1/app.py\", line 38, in post\n    db = sqlite3.connect(app.config['3'])\n                         ~~~~~~~~~~^^^^^\nKeyError: '3'\n",
+      "files": [
+        "app.py",
+        "schema.sql",
+        "templates/base.html",
+        "templates/index.html",
+        "templates/new_post.html",
+        "templates/post.html"
+      ],
+      "loc": 169,
+      "truncated": false
+    },
+    "try2": {
+      "passed": 5,
+      "failed_step": null,
+      "error": null,
+      "files": [
+        "app.py"
+      ],
+      "loc": 169,
+      "truncated": false
+    },
+    "final": 5,
+    "tokens": 1929,
+    "tok_s": 36.3521705762082,
+    "seconds": 59.8
+  },
+  {
+    "model": "qwen3:8b",
+    "seed": 22,
+    "when": "2026-11-08 20:11",
+    "out_dir": "out/qwen3-8b/seed22",
+    "try1": {
+      "passed": 1,
+      "failed_step": "create post",
+      "error": "Traceback (most recent call last):\n  File \"/home/rayan/code/projects/rvb/bakeoff/.venv/lib/python3.12/site-packages/flask/app.py\", line 919, in full_dispatch_request\n    rv = self.handle_user_exception(e)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rayan/code/projects/rvb/bakeoff/.venv/lib/python3.12/site-packages/flask/app.py\", line 917, in full_dispatch_request\n    rv = self.dispatch_request()\n         ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rayan/code/projects/rvb/bakeoff/.venv/lib/python3.12/site-packages/flask/app.py\", line 902, in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rayan/code/projects/rvb/bakeoff/out/qwen3-8b/seed22/try1/app.py\", line 38, in post\n    db = sqlite3.connect(app.config['3DATABASE'])\n                         ~~~~~~~~~~^^^^^^^^^^^^^\nKeyError: '3DATABASE'\n",
+      "files": [
+        "app.py",
+        "schema.sql",
+        "templates/base.html",
+        "templates/index.html",
+        "templates/new_post.html",
+        "templates/post.html"
+      ],
+      "loc": 167,
+      "truncated": false
+    },
+    "try2": {
+      "passed": 5,
+      "failed_step": null,
+      "error": null,
+      "files": [
+        "app.py"
+      ],
+      "loc": 167,
+      "truncated": false
+    },
+    "final": 5,
+    "tokens": 1911,
+    "tok_s": 36.750569165959064,
+    "seconds": 54.2
+  },
+  {
+    "model": "qwen3:8b",
+    "seed": 33,
+    "when": "2026-11-08 20:12",
+    "out_dir": "out/qwen3-8b/seed33",
+    "try1": {
+      "passed": 1,
+      "failed_step": "create post",
+      "error": "Traceback (most recent call last):\n  File \"/home/rayan/code/projects/rvb/bakeoff/.venv/lib/python3.12/site-packages/flask/app.py\", line 919, in full_dispatch_request\n    rv = self.handle_user_exception(e)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rayan/code/projects/rvb/bakeoff/.venv/lib/python3.12/site-packages/flask/app.py\", line 917, in full_dispatch_request\n    rv = self.dispatch_request()\n         ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rayan/code/projects/rvb/bakeoff/.venv/lib/python3.12/site-packages/flask/app.py\", line 902, in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rayan/code/projects/rvb/bakeoff/out/qwen3-8b/seed33/try1/app.py\", line 38, in post\n    db = sqlite3.connect(app.config['3DATABASE'])\n                         ~~~~~~~~~~^^^^^^^^^^^^^\nKeyError: '3DATABASE'\n",
+      "files": [
+        "app.py",
+        "schema.sql",
+        "templates/base.html",
+        "templates/index.html",
+        "templates/new_post.html",
+        "templates/post.html"
+      ],
+      "loc": 166,
+      "truncated": false
+    },
+    "try2": {
+      "passed": 5,
+      "failed_step": null,
+      "error": null,
+      "files": [
+        "app.py"
+      ],
+      "loc": 166,
+      "truncated": false
+    },
+    "final": 5,
+    "tokens": 1884,
+    "tok_s": 36.627520029456626,
+    "seconds": 53.5
+  },
+  {
+    "model": "qwen3.5:9b",
+    "seed": 11,
+    "when": "2026-11-08 21:38",
+    "out_dir": "out/qwen3.5-9b/seed11",
+    "try1": {
+      "passed": 1,
+      "failed_step": "create post",
+      "error": "Traceback (most recent call last):\n  File \"/home/rayan/code/projects/rvb/bakeoff/.venv/lib/python3.12/site-packages/flask/app.py\", line 919, in full_dispatch_request\n    rv = self.handle_user_exception(e)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rayan/code/projects/rvb/bakeoff/.venv/lib/python3.12/site-packages/flask/app.py\", line 917, in full_dispatch_request\n    rv = self.dispatch_request()\n         ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rayan/code/projects/rvb/bakeoff/.venv/lib/python3.12/site-packages/flask/app.py\", line 902, in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rayan/code/projects/rvb/bakeoff/out/qwen3.5-9b/seed11/try1/app.py\", line 50, in new_post\n    return redirect(url_for('show_post', post_id=conn.execute('SELECT id FROM posts ORDER BY id DESC LIMIT 1').fetchone()[0]))\n                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nsqlite3.ProgrammingError: Cannot operate on a closed database.\n",
+      "files": [
+        "app.py",
+        "templates/base.html",
+        "templates/index.html",
+        "templates/new_post.html",
+        "templates/post.html"
+      ],
+      "loc": 144,
+      "truncated": false
+    },
+    "try2": {
+      "passed": 5,
+      "failed_step": null,
+      "error": null,
+      "files": [
+        "app.py"
+      ],
+      "loc": 174,
+      "truncated": false
+    },
+    "final": 5,
+    "tokens": 2309,
+    "tok_s": 30.039239520940086,
+    "seconds": 127.4
+  },
+  {
+    "model": "qwen3.5:9b",
+    "seed": 22,
+    "when": "2026-11-08 21:40",
+    "out_dir": "out/qwen3.5-9b/seed22",
+    "try1": {
+      "passed": 1,
+      "failed_step": "create post",
+      "error": "Traceback (most recent call last):\n  File \"/home/rayan/code/projects/rvb/bakeoff/.venv/lib/python3.12/site-packages/flask/app.py\", line 919, in full_dispatch_request\n    rv = self.handle_user_exception(e)\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rayan/code/projects/rvb/bakeoff/.venv/lib/python3.12/site-packages/flask/app.py\", line 917, in full_dispatch_request\n    rv = self.dispatch_request()\n         ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rayan/code/projects/rvb/bakeoff/.venv/lib/python3.12/site-packages/flask/app.py\", line 902, in dispatch_request\n    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/rayan/code/projects/rvb/bakeoff/out/qwen3.5-9b/seed22/try1/app.py\", line 50, in new_post\n    return redirect(url_for('post', post_id=conn.cursor().lastrowid if hasattr(conn.cursor(), 'lastrowid') else None))\n                                                                               ^^^^^^^^^^^^^\nsqlite3.ProgrammingError: Cannot operate on a closed database.\n",
+      "files": [
+        "app.py",
+        "templates/base.html",
+        "templates/index.html",
+        "templates/new_post.html",
+        "templates/post.html"
+      ],
+      "loc": 165,
+      "truncated": false
+    },
+    "try2": {
+      "passed": 5,
+      "failed_step": null,
+      "error": null,
+      "files": [
+        "app.py"
+      ],
+      "loc": 161,
+      "truncated": false
+    },
+    "final": 5,
+    "tokens": 2648,
+    "tok_s": 29.72146486549651,
+    "seconds": 91.9
+  },
+  {
+    "model": "qwen3.5:9b",
+    "seed": 33,
+    "when": "2026-11-08 21:42",
+    "out_dir": "out/qwen3.5-9b/seed33",
+    "try1": {
+      "passed": 5,
+      "failed_step": null,
+      "error": null,
+      "files": [
+        "app.py",
+        "templates/base.html",
+        "templates/index.html",
+        "templates/new_post.html",
+        "templates/post.html"
+      ],
+      "loc": 169,
+      "truncated": false
+    },
+    "final": 5,
+    "tokens": 1791,
+    "tok_s": 30.049947845471593,
+    "seconds": 60.5
+  },
+  {
+    "model": "qwen3-coder-30b-a3b (MoE)",
+    "seed": 11,
+    "when": "2026-11-08 22:25",
+    "out_dir": "out/qwen3-coder-30b-a3b-MoE/seed11",
+    "try1": {
+      "passed": 0,
+      "failed_step": "home page loads",
+      "error": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 286, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/home/rayan/code/projects/rvb/bakeoff/out/qwen3-coder-30b-a3b-MoE/seed11/try1/app.py\", line 34, in <module>\n    @app.before_first_request\n     ^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'Flask' object has no attribute 'before_first_request'. Did you mean: '_got_first_request'?\n",
+      "files": [
+        "app.py",
+        "templates/base.html",
+        "templates/index.html",
+        "templates/new_post.html",
+        "templates/post.html"
+      ],
+      "loc": 305,
+      "truncated": false
+    },
+    "try2": {
+      "passed": 5,
+      "failed_step": null,
+      "error": null,
+      "files": [
+        "app.py"
+      ],
+      "loc": 305,
+      "truncated": false
+    },
+    "final": 5,
+    "tokens": 2853,
+    "tok_s": 14.426248271203017,
+    "seconds": 213.3,
+    "note": "llama.cpp n-cpu-moe=34"
+  },
+  {
+    "model": "qwen3-coder-30b-a3b (MoE)",
+    "seed": 22,
+    "when": "2026-11-08 22:29",
+    "out_dir": "out/qwen3-coder-30b-a3b-MoE/seed22",
+    "try1": {
+      "passed": 0,
+      "failed_step": "home page loads",
+      "error": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 286, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/home/rayan/code/projects/rvb/bakeoff/out/qwen3-coder-30b-a3b-MoE/seed22/try1/app.py\", line 35, in <module>\n    @app.before_first_request\n     ^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'Flask' object has no attribute 'before_first_request'. Did you mean: '_got_first_request'?\n",
+      "files": [
+        "app.py",
+        "templates/base.html",
+        "templates/index.html",
+        "templates/new_post.html",
+        "templates/post.html"
+      ],
+      "loc": 321,
+      "truncated": false
+    },
+    "try2": {
+      "passed": 5,
+      "failed_step": null,
+      "error": null,
+      "files": [
+        "app.py"
+      ],
+      "loc": 321,
+      "truncated": false
+    },
+    "final": 5,
+    "tokens": 2972,
+    "tok_s": 14.130958575774304,
+    "seconds": 213.7,
+    "note": "llama.cpp n-cpu-moe=34"
+  },
+  {
+    "model": "qwen3-coder-30b-a3b (MoE)",
+    "seed": 33,
+    "when": "2026-11-08 22:33",
+    "out_dir": "out/qwen3-coder-30b-a3b-MoE/seed33",
+    "try1": {
+      "passed": 0,
+      "failed_step": "home page loads",
+      "error": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 286, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/home/rayan/code/projects/rvb/bakeoff/out/qwen3-coder-30b-a3b-MoE/seed33/try1/app.py\", line 35, in <module>\n    @app.before_first_request\n     ^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'Flask' object has no attribute 'before_first_request'. Did you mean: '_got_first_request'?\n",
+      "files": [
+        "app.py",
+        "templates/base.html",
+        "templates/index.html",
+        "templates/new_post.html",
+        "templates/post.html"
+      ],
+      "loc": 316,
+      "truncated": false
+    },
+    "try2": {
+      "passed": 5,
+      "failed_step": null,
+      "error": null,
+      "files": [
+        "app.py"
+      ],
+      "loc": 316,
+      "truncated": false
+    },
+    "final": 5,
+    "tokens": 2956,
+    "tok_s": 14.39990775701817,
+    "seconds": 208.3,
+    "note": "llama.cpp n-cpu-moe=34"
+  }
+]

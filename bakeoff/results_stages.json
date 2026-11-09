@@ -1,0 +1,92 @@
+[
+  {
+    "model": "qwen3:8b",
+    "seed": 11,
+    "when": "2026-11-08 22:47",
+    "stages": [
+      {
+        "stage": 1,
+        "attempts": [
+          {
+            "passed": 0,
+            "total": 1,
+            "failed": [
+              "app starts"
+            ],
+            "error": "Traceback (most recent call last):\n  File \"/home/rayan/code/projects/rvb/bakeoff/stage_smoke.py\", line 30, in main\n    app = runpy.run_path(os.path.join(app_dir, \"app.py\"), run_name=\"__main__\")[\"app\"]\n          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"<frozen runpy>\", line 285, in run_path\n  File \"<frozen runpy>\", line 259, in _get_code_from_file\n  File \"/home/rayan/code/projects/rvb/bakeoff/out_stages/qwen3-8b/seed11/stage1/try1/app.py\", line 38\n    db = sqlite3.connect(app.config['\n                                    ^\nSyntaxError: unterminated string literal (detected at line 38)\n",
+            "prompt_tokens": 327,
+            "tokens": 290,
+            "ctx_used": 617,
+            "truncated": false,
+            "seconds": 15.7,
+            "files": [
+              "app.py"
+            ]
+          },
+          {
+            "passed": 0,
+            "total": 1,
+            "failed": [
+              "app starts"
+            ],
+            "error": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 286, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/home/rayan/code/projects/rvb/bakeoff/out_stages/qwen3-8b/seed11/stage1/try2/app.py\", line 14, in <module>\n    @app.before_first_request\n     ^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'Flask' object has no attribute 'before_first_request'. Did you mean: '_got_first_request'?\n",
+            "prompt_tokens": 850,
+            "tokens": 1391,
+            "ctx_used": 2241,
+            "truncated": false,
+            "seconds": 52.7,
+            "files": [
+              "app.py",
+              "templates/base.html",
+              "templates/index.html",
+              "templates/new_post.html",
+              "templates/post.html",
+              "schema.sql"
+            ]
+          },
+          {
+            "passed": 0,
+            "total": 1,
+            "failed": [
+              "app starts"
+            ],
+            "error": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 286, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/home/rayan/code/projects/rvb/bakeoff/out_stages/qwen3-8b/seed11/stage1/try3/app.py\", line 15, in <module>\n    app.before_first_request(init_db)\n    ^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'Flask' object has no attribute 'before_first_request'. Did you mean: '_got_first_request'?\n",
+            "prompt_tokens": 1820,
+            "tokens": 511,
+            "ctx_used": 2331,
+            "truncated": false,
+            "seconds": 21.0,
+            "files": [
+              "app.py"
+            ]
+          },
+          {
+            "passed": 0,
+            "total": 1,
+            "failed": [
+              "app starts"
+            ],
+            "error": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 286, in run_path\n  File \"<frozen runpy>\", line 98, in _run_module_code\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"/home/rayan/code/projects/rvb/bakeoff/out_stages/qwen3-8b/seed11/stage1/try4/app.py\", line 15, in <module>\n    app.before_first_request(init_db)\n    ^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: 'Flask' object has no attribute 'before_first_request'. Did you mean: '_got_first_request'?\n",
+            "prompt_tokens": 1829,
+            "tokens": 607,
+            "ctx_used": 2436,
+            "truncated": false,
+            "seconds": 25.7,
+            "files": [
+              "app.py",
+              "templates/schema.sql"
+            ]
+          }
+        ],
+        "passed": false
+      }
+    ],
+    "num_ctx": 12288,
+    "stages_passed": 0,
+    "generations": 4,
+    "tokens": 2799,
+    "tok_s": 26.44528239593389,
+    "seconds": 115.2,
+    "max_ctx_used": 2436
+  }
+]

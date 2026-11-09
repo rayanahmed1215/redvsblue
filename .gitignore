@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+bakeoff/.venv/
+
+# Bake-off output: AI-generated apps and raw model replies (regenerate with run.py / run_stages.py)
+bakeoff/out/
+bakeoff/out_stages/
+blog.db
+
+# Downloads
+*.deb
+
+# Node / editors / OS
+node_modules/
+.DS_Store
+.vscode/
