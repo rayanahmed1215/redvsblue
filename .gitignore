@@ -15,3 +15,8 @@ blog.db
 node_modules/
 .DS_Store
 .vscode/
+
+# Builder: its venv, server log, and generated sites (each site is its own git repo)
+builder/.venv/
+builder/.llama-server.log
+sites/
