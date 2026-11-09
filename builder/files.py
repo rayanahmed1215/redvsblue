@@ -11,7 +11,7 @@ FILE_BLOCK = re.compile(
 LONE_BLOCK = re.compile(r"```(?:python|py)?\s*\n(?P<body>.*?)^```\s*$", re.MULTILINE | re.DOTALL)
 
 CODE_SUFFIXES = {".py", ".html", ".css", ".js", ".txt", ".md"}
-SKIP_DIRS = {".git", ".builder", "__pycache__"}
+SKIP_DIRS = {".git", ".builder", ".venv", "__pycache__"}
 LANG = {".py": "python", ".html": "html", ".css": "css", ".js": "javascript"}
 
 
