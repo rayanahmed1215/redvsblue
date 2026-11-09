@@ -53,11 +53,24 @@ def clear_dbs(project: Project):
         db.unlink(missing_ok=True)
 
 
+def remove_new_files(project: Project, before: set):
+    skip = {".git", ".builder", ".venv"}
+    created = [f for f in project.dir.rglob("*")
+               if f not in before and not (skip & set(f.relative_to(project.dir).parts))]
+    for f in sorted(created, key=lambda f: len(f.parts), reverse=True):  # files before their folders
+        if f.is_dir():
+            if not any(f.iterdir()):
+                f.rmdir()
+        else:
+            f.unlink(missing_ok=True)
+
+
 def run_checks(project: Project, level: int, timeout=90) -> dict:
     """Run every roadmap check for features 1..level against the project's current files."""
     if level < 1:
         return {"passed": 0, "total": 0, "failed": [], "skipped": [], "failed_step": None, "error": None}
     clear_dbs(project)  # every check run starts from an empty database
+    before = {f for f in project.dir.rglob("*") if not ({".git", ".builder", ".venv"} & set(f.relative_to(project.dir).parts))}
     cmd = [str(VENV_PY), str(PKG / "checker.py"), str(project.dir), str(project.roadmap().checks), str(level)]
     env = {**os.environ, "PYTHONPATH": str(project.meta / "libs")}  # the site's homemade library versions
     try:
@@ -66,6 +79,7 @@ def run_checks(project: Project, level: int, timeout=90) -> dict:
         return fail("timeout", f"The checks took longer than {timeout}s (the app may hang).")
     finally:
         clear_dbs(project)
+        remove_new_files(project, before)  # e.g. avatars the checks uploaded; don't commit test data
     lines = [l for l in proc.stdout.strip().splitlines() if l.startswith("{")]
     if not lines:
         return fail("crash", (proc.stderr or proc.stdout)[-1500:])

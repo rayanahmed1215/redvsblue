@@ -4,5 +4,13 @@
   {"tick": 3, "features": [3]},
   {"tick": 4, "features": [4]},
   {"tick": 5, "features": [5]},
-  {"tick": 6, "releases": [{"lib": "mdlite", "version": "1.1.0"}]}
+  {"tick": 6, "releases": [{"lib": "mdlite", "version": "1.1.0"}]},
+  {"tick": 7, "features": [6]},
+  {"tick": 8, "features": [7]},
+  {"tick": 9, "features": [8]},
+  {"tick": 10, "releases": [{"lib": "uploadkit", "version": "1.0.1"}, {"lib": "pager", "version": "1.0.1"}]},
+  {"tick": 11, "features": [9]},
+  {"tick": 12, "releases": [{"lib": "mdlite", "version": "1.2.0"}]},
+  {"tick": 13, "features": [10]},
+  {"tick": 14, "releases": [{"lib": "mdlite", "version": "2.0.0"}]}
 ]

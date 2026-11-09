@@ -13,10 +13,12 @@ from builder.config import ModelConfig
 from builder.files import apply_files, parse_files
 from builder.items import WorkItem
 from builder.project import Project
+from builder.roadmap import load as load_roadmap
 from builder.tests.fixtures import FULL_APP, STAGE1_APP
 
 BROKEN_APP = "from flask import Flask\napp = Flask(__name__)\n"  # home page 404s
-FEATURE_STARTS = ["Build a small blog", "Add user accounts", "Let authors edit", "Add tags and search", "Let authors format"]
+ROADMAP = load_roadmap("blog")
+REFERENCE = (Path(__file__).parent / "reference_app.py").read_text()  # all 10 features
 
 
 def reply(app_src, requirements=True, mdlite="1.0.0"):
@@ -48,8 +50,21 @@ class FakeModel:
     @staticmethod
     def key_of(prompt):
         if prompt.startswith("Feature request:"):
-            return next(i for i, f in enumerate(FEATURE_STARTS, 1) if f in prompt[:200])
+            first_line = prompt.split("\n\n", 1)[1].splitlines()[0]
+            return next(s.number for s in ROADMAP.stages if s.text.startswith(first_line))
         return "dep" if prompt.startswith("Dependency update:") else "fix"
+
+
+def full_script(key, attempt, prompt):
+    """Correct replies for all 10 features: the reference app, pinning the library versions the prompt shows
+    (the pinned/newest docs), with an upgrade request's version taking priority."""
+    pins = dict(re.findall(r"^# (mdlite|uploadkit|pager) ([0-9.]+)$", prompt, re.MULTILINE))
+    m = re.search(r"Upgrade the app to (\w+)==([0-9.]+)", prompt)
+    if m:
+        pins[m.group(1)] = m.group(2)
+    if key == 1:
+        return reply(STAGE1_APP, requirements=False)
+    return reply(REFERENCE, requirements="".join(f"{k}=={v}\n" for k, v in pins.items()))
 
 
 def good_script(key, attempt, prompt):
@@ -141,8 +156,24 @@ class RunTest(unittest.TestCase):
         self.assertTrue(self.run_ticks(FakeModel(good_script), ticks=2))
         self.assertEqual(self.p.state()["tick"], 2)
         model = FakeModel(good_script)
-        self.assertTrue(self.run_ticks(model))
+        self.assertTrue(self.run_ticks(model, ticks=4))
         self.assertEqual([k for k, _ in model.calls], [3, 4, 5, "dep"])  # tick 6 ships mdlite 1.1.0
+
+    def test_whole_roadmap_timeline(self):
+        model = FakeModel(full_script)
+        self.assertTrue(self.run_ticks(model))
+        st = self.p.state()
+        self.assertEqual((st["tick"], st["features_done"], st["queue"]), (14, 10, []))
+        # features, plus an upgrade whenever a library the site uses ships a new version
+        self.assertEqual([k for k, _ in model.calls], [1, 2, 3, 4, 5, "dep", 6, 7, 8, "dep", "dep", 9, "dep", 10, "dep"])
+        self.assertEqual(st["deps"], {"mdlite": "2.0.0", "uploadkit": "1.0.1", "pager": "1.0.1"})
+        rels = self.p.releases()
+        self.assertEqual(len(rels), 15)
+        by_title = {r["title"]: r for r in rels}
+        self.assertEqual(by_title["Upgrade mdlite to 1.1.0"]["deps"]["mdlite"], "1.1.0")  # the XSS window opens
+        self.assertEqual(by_title["Upgrade mdlite to 1.2.0"]["tick"], 12)  # ...and closes
+        self.assertFalse((self.p.dir / "static" / "uploads").exists(), "check uploads leaked into the site")
+        self.assertIn("\nEnd of the roadmap timeline.", self.out)
 
     def test_repair_after_failure(self):
         def script(key, attempt, prompt):

@@ -3,6 +3,7 @@
 Loaded by builder/checker.py, which calls define(c, app). Checks run in order; each one only runs at
 or after its stage, so earlier features keep being re-tested.
 """
+import io
 import os
 import re
 
@@ -11,6 +12,7 @@ T = "Bakeoff Title 7731"
 T2 = "Edited Title 7731"
 BODY = "Bakeoff body text 7731 zebra7731"
 COMMENT = "Bakeoff comment 7731"
+PNG = b"\x89PNG\r\n\x1a\n" + b"\x00" * 24  # enough to look like an image
 
 
 def define(c, app):
@@ -103,6 +105,96 @@ def define(c, app):
     def _():
         assert os.path.exists("requirements.txt"), "requirements.txt is missing"
         assert re.search(r"(?im)^\s*mdlite\b", open("requirements.txt").read()), "requirements.txt doesn't list mdlite"
+
+    # ---- feature 6: avatars -------------------------------------------------------------
+    @c.check("avatar upload", 6, needs=("post_id",))
+    def _():
+        r = anon.get("/settings/avatar")
+        assert r.status_code in REDIRECTS and "/login" in r.headers.get("Location", ""), \
+            f"GET /settings/avatar while logged out should redirect to /login, got {r.status_code}"
+        r = alice.post("/settings/avatar", data={"avatar": (io.BytesIO(PNG), "me.png")},
+                       content_type="multipart/form-data", follow_redirects=True)
+        assert r.status_code < 400, f"POST /settings/avatar with a PNG returned {r.status_code}"
+        page = text(anon.get(f"/posts/{c.state['post_id']}"))
+        m = re.search(r"""<img[^>]+src=["'](/static/uploads/[^"']+)["']""", page)
+        assert m, "the post page doesn't show the author's avatar as <img src=\"/static/uploads/...\">"
+        r = anon.get(m.group(1))
+        assert r.status_code == 200 and r.data == PNG, f"the avatar URL {m.group(1)} doesn't serve the uploaded file"
+
+    @c.check("avatar rejects non-images", 6)
+    def _():
+        r = alice.post("/settings/avatar", data={"avatar": (io.BytesIO(b"hello"), "notes.txt")},
+                       content_type="multipart/form-data")
+        assert r.status_code == 400, f"uploading a .txt file should return 400, got {r.status_code}"
+
+    # ---- feature 7: pagination ------------------------------------------------------------
+    @c.check("pagination", 7, needs=("post_id",))
+    def _():
+        for i in range(1, 10):  # 10 posts in total: two full pages of 5
+            data = {"title": f"Page post {i} 7731", "body": "filler", "tags": ""}
+            r = alice.post("/posts/new", data=data, follow_redirects=True)
+            assert r.status_code < 400, f"creating extra post {i} returned {r.status_code}"
+        first = text(anon.get("/"))
+        assert "Page post 9 7731" in first, "the newest post isn't on the first page"
+        assert T not in first, "page 1 should show only the 5 newest posts, but it also shows the oldest one"
+        assert "page=2" in first, "page 1 doesn't link to ?page=2"
+        second = text(anon.get("/?page=2"))
+        assert T in second, "page 2 doesn't show the oldest post"
+        assert "page=1" in second or 'href="/"' in second, "page 2 doesn't link back to page 1"
+
+    # ---- feature 8: profiles --------------------------------------------------------------
+    @c.check("profiles", 8, needs=("post_id",))
+    def _():
+        r = anon.get("/settings/profile")
+        assert r.status_code in REDIRECTS and "/login" in r.headers.get("Location", ""), \
+            f"GET /settings/profile while logged out should redirect to /login, got {r.status_code}"
+        r = alice.post("/settings/profile", data={"bio": "Hi, I'm **bio bold 7731**"}, follow_redirects=True)
+        assert r.status_code < 400, f"POST /settings/profile returned {r.status_code}"
+        r = anon.get("/users/alice")
+        assert r.status_code == 200, f"GET /users/alice returned {r.status_code}"
+        assert "<strong>bio bold 7731</strong>" in text(r), "the bio isn't rendered as Markdown on /users/alice"
+        assert f"/posts/{c.state['post_id']}" in text(r), "/users/alice doesn't link to alice's post"
+        assert anon.get("/users/nobody7731").status_code == 404, "GET /users/<unknown> should return 404"
+        assert "/users/alice" in text(anon.get(f"/posts/{c.state['post_id']}")), "the post page doesn't link to the author's profile"
+
+    # ---- feature 9: admin -----------------------------------------------------------------
+    @c.check("admin panel", 9)
+    def _():
+        for who, client in (("bob (not admin)", bob), ("a logged-out visitor", anon)):
+            assert client.get("/admin").status_code == 403, f"GET /admin by {who} should return 403"
+        r = alice.get("/admin")
+        assert r.status_code == 200 and "bob" in text(r), "GET /admin as the first user (admin) doesn't list the users"
+        r = bob.post("/posts/new", data={"title": "Bob post 7731", "body": "by bob", "tags": ""}, follow_redirects=True)
+        assert r.status_code < 400, f"bob creating a post returned {r.status_code}"
+        ids = [int(i) for i in re.findall(r"/posts/(\d+)", text(alice.get("/admin")))]
+        assert ids, "GET /admin doesn't link to the posts"
+        bob_post = max(ids)
+        assert bob.post(f"/admin/posts/{bob_post}/delete").status_code == 403, \
+            "POST /admin/posts/<id>/delete by a non-admin should return 403"
+        r = alice.post(f"/admin/posts/{bob_post}/delete", follow_redirects=True)
+        assert r.status_code < 400, f"admin POST /admin/posts/<id>/delete returned {r.status_code}"
+        assert "Bob post 7731" not in text(anon.get("/")), "the admin deleted bob's post but it still appears on /"
+
+    # ---- feature 10: messages --------------------------------------------------------------
+    @c.check("messages", 10)
+    def _():
+        r = anon.get("/messages")
+        assert r.status_code in REDIRECTS and "/login" in r.headers.get("Location", ""), \
+            f"GET /messages while logged out should redirect to /login, got {r.status_code}"
+        r = alice.post("/messages", data={"to": "bob", "body": "Secret message 7731"}, follow_redirects=True)
+        assert r.status_code < 400, f"POST /messages returned {r.status_code}"
+        inbox = text(bob.get("/messages"))
+        assert "Secret message 7731" in inbox or "/messages/" in inbox, "bob's inbox doesn't show alice's message"
+        ids = re.findall(r"/messages/(\d+)", inbox)
+        assert ids, "bob's inbox doesn't link to /messages/<id>"
+        mid = max(int(i) for i in ids)
+        r = bob.get(f"/messages/{mid}")
+        assert r.status_code == 200 and "Secret message 7731" in text(r), "bob can't read the message alice sent him"
+        carol = app.test_client()
+        carol.post("/register", data={"username": "carol", "password": "pw-carol-1"}, follow_redirects=True)
+        assert carol.get(f"/messages/{mid}").status_code == 403, "a third user could read a message between alice and bob"
+        r = alice.post("/messages", data={"to": "nobody7731", "body": "x"})
+        assert r.status_code == 400, f"sending to a user that doesn't exist should return 400, got {r.status_code}"
 
     @c.check("others can't edit or delete", 3, needs=("post_id",))
     def _():
