@@ -19,6 +19,8 @@ You learn by watching attacks and fixes happen. These docs cover what has been b
 | Nov 9–10 | `demo` run: features 1–3 released (v1–v3). Feature 4 (tags and search) failed all 3 tries. |
 | Nov 15 | Builder v2: plan first, then one file per call, with a "files agree" check. First try on feature 4 caught the bug in one line. |
 | Nov 18 | Paused at tick 4 on both sites. These docs written. |
+| Nov 18 | v2 long run on `demo2`: v4 → v11 (features 4–8, three dependency updates). Three error messages rewritten to say *why*. Stopped at feature 9: context full. |
+| Nov 18 | Builder v3: edit-based replies. `demo3` (a copy of `demo2` at v11) finished the **whole 14-tick timeline**: v15, all 10 features, mdlite 2.0.0 handled. |
 
 ## Chapters
 
@@ -27,3 +29,5 @@ You learn by watching attacks and fixes happen. These docs cover what has been b
 3. [Builder v1](03-builder-v1.md): the queue, releases, planted bugs and the `demo` run
 4. [Builder v2](04-builder-v2.md): plan first, then write one file at a time
 5. [Decisions and what's next](05-decisions-and-next.md): every decision in one table
+6. [Builder v2 long run](06-builder-v2-full-run.md): `demo2` from v4 to v11, and where it hit the wall
+7. [Builder v3: edits](07-builder-v3-edits.md): FIND/REPLACE edits, the first full timeline, and what the Builder did with the planted bugs

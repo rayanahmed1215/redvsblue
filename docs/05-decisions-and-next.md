@@ -16,13 +16,16 @@
 | Nov 10 | Pause and rethink after feature 4 failed 3 times | Rewriting whole files doesn't scale | Keep retrying |
 | Nov 15 | Builder v2: plan first, then one file per call, plus a "files agree" check | Files disagreed on shared names | Edit-based replies (still on the list) |
 | Nov 15 | v2 in its own folder, on a copy of the site | So v1 and v2 can be compared on the same feature | Change `builder/` in place |
+| Nov 18 | Make check errors say *why* they failed | The model repeated vague errors 6/6 times, and fixed explained ones in 1–2 tries | Leave the checks alone and raise the try limit |
+| Nov 18 | Edit-based replies (`builder3/`), on `demo3`, a copy of `demo2` at v11 | `demo2` hit the 12k context: the prompt plus a full `app.py` rewrite is over 12,288 tokens | A 16k context (only delays it), splitting `app.py` |
+| Nov 18 | v3 in its own folder; a try fails only if *no* file changed | Keeps v2 reproducible; a correct file legitimately needs no edit on a retry | Edit builder2 in place; reject any unchanged file |
 
 ## What's next
-1. **Finish feature 4 with v2:** `python3 -m builder2 run demo2 --ticks 0`
-2. **Edit-based replies:** the model sends find/replace edits for existing files and whole files only for new ones. `app.py` alone is already a 2,710-token reply.
+1. ~~Finish feature 4 with v2~~: done, and `demo2` reached v11 (see chapter 6).
+2. ~~Edit-based replies~~: done as `builder3/`, and `demo3` finished the whole timeline (see chapter 7).
 3. **Split the app into a few files** (route files per area), so each prompt only includes what a feature touches.
 4. **Keep releases and reuse them:** Red and Blue attack saved releases many times over.
-5. **Run the full 14-tick timeline** and see how the Builder handles the planted bugs (mdlite 1.1.0 XSS, uploadkit 1.0.0 path traversal, the mdlite 2.0.0 breaking change).
+5. ~~Finish the 14-tick timeline~~: done on `demo3` (v15) and see how the Builder handles the planted bugs (mdlite 1.1.0 XSS, uploadkit 1.0.0 path traversal, the mdlite 2.0.0 breaking change).
 6. Maybe let the Builder **decide** whether to take a dependency update.
 7. **Build Red:** attack each release, and score it against `advisories.json` and against bugs in the Builder's own code.
 8. **Build Blue:** read breach reports, file `fix` tickets, check each fix with Red's retest, and turn proven fixes into secure-coding rules for the Builder's prompt.

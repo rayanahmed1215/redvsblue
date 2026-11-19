@@ -99,6 +99,9 @@ def define(c, app):
     @c.check("markdown", 5, needs=("post_id",))
     def _():
         page = text(anon.get(f"/posts/{c.state["post_id"]}"))
+        assert "&lt;strong&gt;bold words 7731" not in page, \
+            "the Markdown HTML is shown as escaped text (&lt;strong&gt;...) on the post page: Jinja auto-escapes " \
+            "the filter's output, so return markupsafe.Markup(...) from the filter or use |safe in the template"
         assert "<strong>bold words 7731</strong>" in page, "**bold words 7731** in the body isn't rendered as <strong>bold words 7731</strong>"
 
     @c.check("requirements.txt", 5)
@@ -135,9 +138,17 @@ def define(c, app):
             r = alice.post("/posts/new", data=data, follow_redirects=True)
             assert r.status_code < 400, f"creating extra post {i} returned {r.status_code}"
         first = text(anon.get("/"))
+        if "Page post 9 7731" not in first and T in first:
+            raise AssertionError(
+                "page 1 shows the oldest posts instead of the newest: these posts were all created in the same "
+                "second, and created_at only stores whole seconds, so sorting by created_at alone ties. "
+                "Sort by created_at DESC, id DESC (or just id DESC)")
         assert "Page post 9 7731" in first, "the newest post isn't on the first page"
         assert T not in first, "page 1 should show only the 5 newest posts, but it also shows the oldest one"
-        assert "page=2" in first, "page 1 doesn't link to ?page=2"
+        assert "page=2" in first, (
+            "page 1 doesn't link to ?page=2, although 10 posts exist (two pages of 5), so the app thinks there is "
+            "only one page. If you use pager.paginate(), pass it the full list of posts: it does the slicing "
+            "itself, so don't also apply LIMIT/OFFSET in SQL")
         second = text(anon.get("/?page=2"))
         assert T in second, "page 2 doesn't show the oldest post"
         assert "page=1" in second or 'href="/"' in second, "page 2 doesn't link back to page 1"
@@ -152,6 +163,9 @@ def define(c, app):
         assert r.status_code < 400, f"POST /settings/profile returned {r.status_code}"
         r = anon.get("/users/alice")
         assert r.status_code == 200, f"GET /users/alice returned {r.status_code}"
+        assert "&lt;strong&gt;bio bold 7731" not in text(r), \
+            "the bio's Markdown HTML is shown as escaped text (&lt;strong&gt;...) on /users/alice: Jinja auto-escapes " \
+            "the filter's output, so return markupsafe.Markup(...) from the filter or use |safe in the template"
         assert "<strong>bio bold 7731</strong>" in text(r), "the bio isn't rendered as Markdown on /users/alice"
         assert f"/posts/{c.state['post_id']}" in text(r), "/users/alice doesn't link to alice's post"
         assert anon.get("/users/nobody7731").status_code == 404, "GET /users/<unknown> should return 404"
@@ -163,7 +177,11 @@ def define(c, app):
         for who, client in (("bob (not admin)", bob), ("a logged-out visitor", anon)):
             assert client.get("/admin").status_code == 403, f"GET /admin by {who} should return 403"
         r = alice.get("/admin")
-        assert r.status_code == 200 and "bob" in text(r), "GET /admin as the first user (admin) doesn't list the users"
+        assert r.status_code == 200, (
+            f"GET /admin as alice returned {r.status_code}, but alice registered first, so she is the admin. "
+            f"(bob registered after her, so a check like 'the number of users is 1' is wrong: store or look up "
+            f"who registered first, e.g. the user with the lowest id)")
+        assert "bob" in text(r), "GET /admin as the first user (admin) doesn't list the users (bob is missing)"
         r = bob.post("/posts/new", data={"title": "Bob post 7731", "body": "by bob", "tags": ""}, follow_redirects=True)
         assert r.status_code < 400, f"bob creating a post returned {r.status_code}"
         ids = [int(i) for i in re.findall(r"/posts/(\d+)", text(alice.get("/admin")))]
